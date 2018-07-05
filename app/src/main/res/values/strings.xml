@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Sprinkle System vAlpha</string>
+    <string name="SW1">Switch</string>
+    <string name="led1">LED1</string>
+    <string name="sprinkle">Activate  Sprinkle! </string>
+    <string name="photo_shoot">Take Snap</string>
+    <string name="rain">It is Raining!</string>
+    <string name="motion">Motion</string>
+    <string name="controllable_switches_text">Controllable Switches</string>
+    <string name="available_switches">Available Switches</string>
+    <string name="status_switches">Status Switches</string>
+</resources>
