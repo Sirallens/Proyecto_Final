@@ -3,6 +3,7 @@ package com.worksu.unlimited.app2
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.SwitchCompat
 import android.util.Log
 import android.widget.CompoundButton
@@ -27,20 +28,17 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        switchRain.isClickable = false
+        switchMotion.isClickable = false
 
 
         switchPhoto.setOnClickListener {
-            if(switchPhoto.isChecked)
-            {
-                switchPhoto.text = "Nope"
-            }
 
-            else switchPhoto.text = getString(R.string.photo_shoot)
+            update()
 
         }
 
-        switchRain.isClickable = false
-        switchMotion.isClickable = false
+
 
         switchSprinkle.setOnClickListener {
 
@@ -48,10 +46,6 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener
 
         }
 
-        switchMotion.setOnClickListener {
-
-            update()
-        }
 
 
         swipeLayout.setOnRefreshListener {
@@ -81,6 +75,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener
         // Get status of SW1 and LED1
         val Sprinkle_status = if (switchSprinkle.isChecked) 1 else 0
         val Photo_status = if (switchPhoto.isChecked) 1 else 0
+
         val url = "https://unlimitedphelotelia.000webhostapp.com/scripts/sync_app_data.php"
         val jsonObject = JSONObject()
         jsonObject.put("username", "ben")
@@ -96,11 +91,17 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener
                     if (response["success"] == 1) {
 
                        // Set the statuses to the ones received
-                        refreshSwitch = false
+                        //refreshSwitch = false
                         switchRain.isChecked = (response.get("rain") == 1)
                         switchMotion.isChecked = (response.get("motion") == 1)
-                        refreshSwitch = true
-                        Toast.makeText(this, "It succeeded!",Toast.LENGTH_LONG).show()
+                        switchPhoto.isChecked = false
+                        //refreshSwitch = true
+
+                        if((switchMotion.isChecked == true || switchRain.isChecked == true) && switchSprinkle.isChecked == true)
+                        {
+                            showDialog()
+                            update()
+                        }
                     }
                     else
                     {
@@ -116,12 +117,40 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener
 
 
         Volley.newRequestQueue(this).add(jsonObjectRequest)
+
+
     }
 
 
+    private fun showDialog() {
 
+        val popup: AlertDialog.Builder = AlertDialog.Builder(this)
+        popup.setTitle("Warning!")
+        popup.setMessage("Either movement or rain is detected. \n Do you still want to activate the Sprinkle?")
+        popup.setPositiveButton("Yes I do.", {dialog, which ->
+            Toast.makeText(this, "You clicked OK", Toast.LENGTH_LONG).show()
 
+        })
+        popup.setNegativeButton("No.", { dialog, which -> switchSprinkle.isChecked = false
+            Toast.makeText(this, "You clicked 'No', activation has been cancelled. ", Toast.LENGTH_LONG).show()
+        })
+        popup.show()
+    }
 
+    private fun showDialog2() {
+
+        val popup: AlertDialog.Builder = AlertDialog.Builder(this)
+        popup.setTitle("Warning!")
+        popup.setMessage("Movement is detected. \n Do you want to turn off  Sprinkle?")
+        popup.setPositiveButton("Yes I do.", {dialog, which -> switchSprinkle.isChecked = false
+            Toast.makeText(this, "You clicked OK. Sprinkle turned off", Toast.LENGTH_LONG).show()
+
+        })
+        popup.setNegativeButton("No.", { dialog, which -> switchSprinkle.isChecked = false
+            Toast.makeText(this, "You clicked 'No'. ", Toast.LENGTH_LONG).show()
+        })
+        popup.show()
+    }
 
 
 
